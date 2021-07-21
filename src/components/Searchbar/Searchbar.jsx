@@ -1,5 +1,4 @@
-
-// import PropTypes from 'prop-types';
+import PropTypes from 'prop-types';
 import css from './Searchbar.module.css';
 
 const Searchbar = ({ handleSubmit }) => {
@@ -22,5 +21,9 @@ const Searchbar = ({ handleSubmit }) => {
         </header>
     );
 }
+
+Searchbar.propTypes = {
+  handleSubmit: PropTypes.func.isRequired
+};
 
 export default Searchbar;

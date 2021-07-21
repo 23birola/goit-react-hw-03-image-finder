@@ -1,5 +1,4 @@
 import React, { Component } from "react";
-// import axios from 'axios';
 
 import Searchbar from "./components/Searchbar/Searchbar";
 import ImageGallery from "./components/ImageGallery/ImageGallery";
@@ -7,6 +6,7 @@ import Button from "./components/Button/Button";
 import Modal from "./components/Modal/Modal";
 import fetchImages from "./services/imageApi";
 import Spinner from "./components/Loader/Loader";
+import toast, { Toaster } from "react-hot-toast";
 
 import "./App.css";
 
@@ -22,32 +22,57 @@ export default class App extends Component {
   handleSubmit = (e) => {
     e.preventDefault();
     const query = e.target.elements.query.value.toLowerCase();
+
+    if (!query.trim()) {
+      this.setState({
+        page: 1,
+        status: "IDLE",
+      });
+      return toast.error("Enter query", { position: "top-right" });
+    }
+
+    if (this.state.query === query) {
+      return;
+    }
+
     this.setState({
       query: query,
       status: "LOADING",
+      page: 1,
+      images: [],
     });
-    // e.target.elements.query.value = '';
   };
 
   async componentDidUpdate(prevProps, prevState) {
-    try {
-      const { query, page } = this.state;
-      if (
-        prevState.query !== this.state.query ||
-        prevState.page !== this.state.page
-      ) {
+    const { query, page } = this.state;
+    if (
+      prevState.query !== this.state.query ||
+      prevState.page !== this.state.page
+    ) {
+      try {
         const images = await fetchImages(query, page);
+
+        if (!images.length) {
+          throw new Error();
+        }
+
         this.setState((prevState) => ({
           images: [...prevState.images, ...images],
           status: "RESOLVED",
         }));
+      } catch (err) {
+        console.log("неверный запрос");
+        toast.error("wrong query", { position: "top-right" });
+        this.setState({ status: "ERROR" });
+        return;
       }
-      this.state.page > 1 &&
-        window.scrollTo({
-          top: document.documentElement.scrollHeight,
-          behavior: "smooth",
-        });
-    } catch (err) {}
+    }
+
+    this.state.page > 1 &&
+      window.scrollTo({
+        top: document.documentElement.scrollHeight,
+        behavior: "smooth",
+      });
   }
 
   handleButtonClick = () => {
@@ -67,14 +92,18 @@ export default class App extends Component {
 
   onModalClose = () => {
     this.setState({ selectedImg: null });
-    // document.body.classList.remove("modal-open");
   };
 
   render() {
     const { images, status } = this.state;
 
     if (status === "IDLE") {
-      return <Searchbar handleSubmit={this.handleSubmit} />;
+      return (
+        <>
+          <Searchbar handleSubmit={this.handleSubmit} />
+          <Toaster />
+        </>
+      );
     }
 
     if (status === "LOADING") {
@@ -96,6 +125,14 @@ export default class App extends Component {
             <Modal image={this.state.selectedImg} onClose={this.onModalClose} />
           )}
         </div>
+      );
+    }
+    if (status === "ERROR") {
+      return (
+        <>
+          <Searchbar handleSubmit={this.handleSubmit} />
+          <Toaster />
+        </>
       );
     }
   }
