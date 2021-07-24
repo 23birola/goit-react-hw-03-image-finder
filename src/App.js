@@ -37,7 +37,6 @@ export default class App extends Component {
 
     this.setState({
       query: query,
-      status: "LOADING",
       page: 1,
       images: [],
     });
@@ -50,8 +49,8 @@ export default class App extends Component {
       prevState.page !== this.state.page
     ) {
       try {
+        this.setState({ status: "LOADING" });
         const images = await fetchImages(query, page);
-
         if (!images.length) {
           throw new Error();
         }
@@ -61,7 +60,6 @@ export default class App extends Component {
           status: "RESOLVED",
         }));
       } catch (err) {
-        console.log("неверный запрос");
         toast.error("wrong query", { position: "top-right" });
         this.setState({ status: "ERROR" });
         return;
@@ -76,13 +74,9 @@ export default class App extends Component {
   }
 
   handleButtonClick = () => {
-    return (
-      this.setState((prevState) => ({
-        page: prevState.page + 1,
-        status: "LOADING",
-      })),
-      console.log(this.state.page)
-    );
+    return this.setState((prevState) => ({
+      page: prevState.page + 1,
+    }));
   };
 
   onSelectImg = (src, alt) => {
