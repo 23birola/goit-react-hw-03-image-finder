@@ -28,7 +28,7 @@ export default class App extends Component {
         page: 1,
         status: "IDLE",
       });
-      return toast.error("Enter query", { position: "top-right" });
+      return toast.error("Enter query");
     }
 
     if (this.state.query === query) {
@@ -60,7 +60,7 @@ export default class App extends Component {
           status: "RESOLVED",
         }));
       } catch (err) {
-        toast.error("wrong query", { position: "top-right" });
+        toast.error("wrong query");
         this.setState({ status: "ERROR" });
         return;
       }
@@ -90,44 +90,28 @@ export default class App extends Component {
 
   render() {
     const { images, status } = this.state;
-
-    if (status === "IDLE") {
-      return (
-        <>
-          <Searchbar handleSubmit={this.handleSubmit} />
-          <Toaster />
-        </>
-      );
-    }
-
-    if (status === "LOADING") {
-      return (
-        <>
-          <Searchbar handleSubmit={this.handleSubmit} />
-          <Spinner />
-        </>
-      );
-    }
-
-    if (status === "RESOLVED") {
-      return (
-        <div className="App">
-          <Searchbar handleSubmit={this.handleSubmit} />
+    return (
+      <div className={App}>
+        <Searchbar handleSubmit={this.handleSubmit} />
+        {(status === "IDLE" || status === "ERROR") && (
+          <Toaster position="top-right" />
+        )}
+        {(status === "LOADING" || status === "RESOLVED") && (
           <ImageGallery images={images} onSelectImg={this.onSelectImg} />
-          <Button onClick={this.handleButtonClick} />
-          {this.state.selectedImg && (
-            <Modal image={this.state.selectedImg} onClose={this.onModalClose} />
-          )}
-        </div>
-      );
-    }
-    if (status === "ERROR") {
-      return (
-        <>
-          <Searchbar handleSubmit={this.handleSubmit} />
-          <Toaster />
-        </>
-      );
-    }
+        )}
+        {status === "LOADING" && <Spinner />}
+        {status === "RESOLVED" && (
+          <div className="App">
+            <Button onClick={this.handleButtonClick} />
+            {this.state.selectedImg && (
+              <Modal
+                image={this.state.selectedImg}
+                onClose={this.onModalClose}
+              />
+            )}
+          </div>
+        )}
+      </div>
+    );
   }
 }
