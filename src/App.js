@@ -91,7 +91,7 @@ export default class App extends Component {
   render() {
     const { images, status } = this.state;
     return (
-      <div className={App}>
+      <div className="App">
         <Searchbar handleSubmit={this.handleSubmit} />
         {(status === "IDLE" || status === "ERROR") && (
           <Toaster position="top-right" />
@@ -101,7 +101,7 @@ export default class App extends Component {
         )}
         {status === "LOADING" && <Spinner />}
         {status === "RESOLVED" && (
-          <div className="App">
+          <>
             <Button onClick={this.handleButtonClick} />
             {this.state.selectedImg && (
               <Modal
@@ -109,7 +109,7 @@ export default class App extends Component {
                 onClose={this.onModalClose}
               />
             )}
-          </div>
+          </>
         )}
       </div>
     );
